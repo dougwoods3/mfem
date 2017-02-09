@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
    int order = 1;
    bool static_cond = false;
    bool visualization = 1;
+   bool useVisIt = 1;
 
    OptionsParser args(argc, argv);
    args.AddOption(&mesh_file, "-m", "--mesh",
@@ -61,6 +62,7 @@ int main(int argc, char *argv[])
    args.AddOption(&visualization, "-vis", "--visualization", "-no-vis",
                   "--no-visualization",
                   "Enable or disable GLVis visualization.");
+   args.AddOption(&useVisIt, "-visit", "--visit", "-no-visit", "--no-visit", "Enable or disable VisIt visualization.");
    args.Parse();
    if (!args.Good())
    {
@@ -187,6 +189,14 @@ int main(int argc, char *argv[])
       socketstream sol_sock(vishost, visport);
       sol_sock.precision(8);
       sol_sock << "solution\n" << *mesh << x << flush;
+   }
+   // Dump VisIt files for VisIt visualization.
+   if (useVisIt)  {
+     VisItDataCollection visit_dc("hw3", mesh);
+     visit_dc.RegisterField("solution", &x);
+     visit_dc.SetCycle(0.0);
+     visit_dc.SetTime(0.0);
+     visit_dc.Save();
    }
 
    // 14. Free the used memory.
